@@ -222,6 +222,7 @@ public function cmp($a, $b)
 }
     public function search(Request $request)
     {
+        dd($request);
         $x = $request->input('x');
         $y = $request->input('y');
         $r = $request->input('r');
