@@ -14,3 +14,8 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/google/{x}/{y}', function($x, $y)
+    {
+        return "Searching around $x and $y";
+    });
