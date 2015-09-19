@@ -241,7 +241,15 @@ public function cmp($a, $b)
         {
             if (isset($wx, $wy, $wp))
             {
-        	    $imoveis[$i]['score'] = $wp * 1/$this->getDistance($imoveis[$i]['latitude'], $imoveis[$i]['longitude'], $wx, $wy);
+            	$work = $this->getDistance($imoveis[$i]['latitude'], $imoveis[$i]['longitude'], $wx, $wy);
+            	if ($work)
+            	{
+        	    	$imoveis[$i]['score'] = $wp * 1 / $work;
+            	}
+            	else
+            	{
+            		$imoveis[$i]['score'] = $wp * 1 / 0.001;	
+            	}
             }
             else
             {
