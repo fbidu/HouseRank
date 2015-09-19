@@ -186,11 +186,11 @@ public function getDistance($lat1, $lon1, $lat2, $lon2) {
         return $this->searchStaticViva($x, $y, $r);
     }
 
-    public function searchStaticViva($x, $y, $r)
+    public function searchStaticViva($x, $y, $r, $business = 'VENTA')
     {
         $key = env('VIVA_KEY');
         $client = new \GuzzleHttp\Client();
-        $url = "http://api.vivareal.com/api/1.0/listings?lat=$x&long=$y&r=$r&maxResults=-1&portal=VR_BR&exactLocation=false&language=pt&apiKey=$key";
+        $url = "http://api.vivareal.com/api/1.0/listings?lat=$x&long=$y&r=$r&maxResults=-1&portal=VR_BR&business=$business&exactLocation=false&language=pt&apiKey=$key";
         $res = $client->request('GET', $url);
         return json_decode($res->getBody(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
     }
@@ -230,7 +230,8 @@ public function cmp($a, $b)
         $wx = $request->input('wx');
         $wy = $request->input('wy');
         $wp = $request->input('wp');
-        $imoveis = $this->searchStaticViva($x, $y, $r)['listings'];
+        $business = $request->input('business');
+        $imoveis = $this->searchStaticViva($x, $y, $r, $business)['listings'];
         $types = explode(',', $types);
         $weights = explode(',', $weights);
 
