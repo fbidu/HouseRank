@@ -15,7 +15,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/google/{x}/{y}', function($x, $y)
+Route::get('/google/{x}/{y}/{r}', function($x, $y, $r)
     {
-        return "Searching around $x and $y";
-    });
+        $key = env('MAPS_KEY');
+        $client = new GuzzleHttp\Client();
+        $url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$x,$y&radius=$r&key=$key";
+        $res = $client->request('GET', $url);
+        return $res->getBody();
+});
