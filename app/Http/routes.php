@@ -19,3 +19,6 @@ Route::get('/google', 'Rank@searchMaps');
 
 Route::get('/viva', 'Rank@searchViva');
 
+Route::get('/search', 'Rank@search');
+
+Route::get('/geocode', 'Rank@geocode');
