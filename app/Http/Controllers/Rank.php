@@ -109,6 +109,18 @@ class Rank extends Controller
         'veterinary_care',
         'zoo'
     ];
+
+public function getDistance($lat1, $lon1, $lat2, $lon2) {
+
+  $theta = $lon1 - $lon2;
+  $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
+  $dist = acos($dist);
+  $dist = rad2deg($dist);
+  $miles = $dist * 60 * 1.1515;
+
+ return ($miles * 1.609344);
+
+}
     /**
      * undocumented function
      *
@@ -136,15 +148,22 @@ class Rank extends Controller
         return json_decode($res->getBody(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
     }
 
-    public static function getDistance($x1, $y1, $x2, $y2)
-    {
-        $key = env('MAPS_KEY');
-        $client = new \GuzzleHttp\Client();
-        $url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=$x1,$y1&destinations=$x2,$y2&key=$key";
-        $response = $client->request('GET', $url);
-        $response = json_decode($response->getBody());
-        return $response->rows[0]->elements[0]->duration->value;
-    }
+    // public static function getDistance($x1, $y1, $x2, $y2)
+    // {
+    //     $key = env('MAPS_KEY');
+    //     $client = new \GuzzleHttp\Client();
+    //     $url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=$x1,$y1&destinations=$x2,$y2&key=$key";
+    //     $response = $client->request('GET', $url);
+    //     $response = json_decode($response->getBody(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+    //     if (isset($response->rows[0]->elements[0]->duration->value))
+    //     {
+    //     	return $response->rows[0]->elements[0]->duration->value;
+    //     }
+    //     else
+    //     {
+    //     	return -1;
+    //     }
+    // }
 
 
     public function geocode(Request $request)
@@ -177,53 +196,71 @@ class Rank extends Controller
     }
 
 
-    public function findClosest()
+    public function findClosest($x, $y, $results = [])
     {
+    	$closest = 99999999;
+    	foreach ($results as $location)
+    	{
+    		$lat = (float) $location['geometry']['location']['lat'];
+    		$lng = (float) $location['geometry']['location']['lng'];
+    		$distance = $this->getDistance($lat, $lng, (float) $x, (float) $y);
+    		if($distance < $closest)
+    		{
+    			$closest = $distance;
+    		}
+    	}
 
+    	return $closest;
     }
 
-
+public function cmp($a, $b)
+{
+    if ($a['score'] == $b['score']) {
+        return 0;
+    }
+    return ($a['score'] < $b['score']) ? -1 : 1;
+}
     public function search(Request $request)
     {
         $x = $request->input('x');
         $y = $request->input('y');
         $r = $request->input('r');
         $types = $request->input('types');
+        $weights = $request->input('weights');
 
         $imoveis = $this->searchStaticViva($x, $y, $r)['listings'];
 
         $types = explode(',', $types);
+        $weights = explode(',', $weights);
+
         $surroudings = [];
 
-        foreach ($imoveis as $imovel)
+		for($i = 0; $i < sizeof($imoveis); $i++)
         {
-        	$surroudings[$imovel['propertyId']] = [];
-        	$lat = $imovel['latitude'];
-        	$lng = $imovel['longitude'];
-        	foreach ($types as $type)
+        	$imoveis[$i]['score'] = 0;
+        }
+
+        foreach ($types as $type) {
+        	if (in_array($type, $this->GOOGLE_TYPES))
         	{
-        		if (in_array($type, $this->GOOGLE_TYPES))
+            	$surroudings[$type] = $this->searchStaticMaps($x, $y, $r+1000, $type)['results'];
+            	for($i = 0; $i < sizeof($imoveis); $i++)
         		{
-            		$surroudings[$imovel['propertyId']][$type] = $this->searchStaticMaps($lat, $lng, 200, $type)['results'];
+        			$imoveis[$i]['score']  += $weights[array_search($type, $types)] * 1/$this->findClosest($imoveis[$i]['latitude'], $imoveis[$i]['longitude'], $surroudings[$type]);
         		}
-        		else
-        		{
-        			$surroudings[$imovel['propertyId']][$type] = [];
-        		}
+        	}
+        	else
+        	{
+        		$surroudings[$type] = [];
         	}
         }
 
-        
-        
-
-        
-
-
-
-        return $surroudings;
-        
+        $imoveis = array_values(array_sort($imoveis, function($value)
+		{
+    		return (float) $value['score'];
+		}));
+		return array_reverse($imoveis);
     }
-    
 }
 
 
