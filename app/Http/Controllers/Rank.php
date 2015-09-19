@@ -110,17 +110,17 @@ class Rank extends Controller
         'zoo'
     ];
 
-// public function getDistance($lat1, $lon1, $lat2, $lon2) {
+public function getDistance($lat1, $lon1, $lat2, $lon2) {
 
-//   $theta = $lon1 - $lon2;
-//   $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
-//   $dist = acos($dist);
-//   $dist = rad2deg($dist);
-//   $miles = $dist * 60 * 1.1515;
+  $theta = $lon1 - $lon2;
+  $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
+  $dist = acos($dist);
+  $dist = rad2deg($dist);
+  $miles = $dist * 60 * 1.1515;
 
-//  return ($miles * 1.609344);
+ return ($miles * 1.609344);
 
-// }
+}
     /**
      * undocumented function
      *
@@ -148,22 +148,22 @@ class Rank extends Controller
         return json_decode($res->getBody(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
     }
 
-    public static function getDistance($x1, $y1, $x2, $y2)
-    {
-        $key = env('MAPS_KEY');
-        $client = new \GuzzleHttp\Client();
-        $url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=$x1,$y1&destinations=$x2,$y2&key=$key";
-        $response = $client->request('GET', $url);
-        $response = json_decode($response->getBody(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
-        if (isset($response->rows[0]->elements[0]->duration->value))
-        {
-        	return $response->rows[0]->elements[0]->duration->value;
-        }
-        else
-        {
-        	return -1;
-        }
-    }
+    // public static function getDistance($x1, $y1, $x2, $y2)
+    // {
+    //     $key = env('MAPS_KEY');
+    //     $client = new \GuzzleHttp\Client();
+    //     $url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=$x1,$y1&destinations=$x2,$y2&key=$key";
+    //     $response = $client->request('GET', $url);
+    //     $response = json_decode($response->getBody(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+    //     if (isset($response->rows[0]->elements[0]->duration->value))
+    //     {
+    //     	return $response->rows[0]->elements[0]->duration->value;
+    //     }
+    //     else
+    //     {
+    //     	return -1;
+    //     }
+    // }
 
 
     public function geocode(Request $request)
@@ -213,16 +213,10 @@ class Rank extends Controller
     	return $closest;
     }
 
-public function cmp($a, $b)
-{
-    if ($a['score'] == $b['score']) {
-        return 0;
-    }
-    return ($a['score'] < $b['score']) ? -1 : 1;
-}
+
     public function search(Request $request)
     {
-        $x = $request->input('x');
+    	$x = $request->input('x');
         $y = $request->input('y');
         $r = $request->input('r');
         $types = $request->input('types');
@@ -232,6 +226,7 @@ public function cmp($a, $b)
         $wp = $request->input('wp');
         $business = $request->input('business');
         $imoveis = $this->searchStaticViva($x, $y, $r, $business)['listings'];
+        
         $types = explode(',', $types);
         $weights = explode(',', $weights);
 
@@ -242,6 +237,7 @@ public function cmp($a, $b)
             if (isset($wx, $wy, $wp))
             {
             	$work = $this->getDistance($imoveis[$i]['latitude'], $imoveis[$i]['longitude'], $wx, $wy);
+            	
             	if ($work)
             	{
         	    	$imoveis[$i]['score'] = $wp * 1 / $work;
