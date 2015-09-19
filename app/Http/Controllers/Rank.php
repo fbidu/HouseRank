@@ -222,9 +222,9 @@ public function cmp($a, $b)
 }
     public function search(Request $request)
     {
-        $x = (float) $request->input('x');
-        $y = (float) $request->input('y');
-        $r = (int) $request->input('r');
+        $x = $request->input('x');
+        $y = $request->input('y');
+        $r = $request->input('r');
         $types = $request->input('types');
         $weights = $request->input('weights');
         $wx = $request->input('wx');
