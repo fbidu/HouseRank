@@ -227,6 +227,9 @@ public function cmp($a, $b)
         $r = $request->input('r');
         $types = $request->input('types');
         $weights = $request->input('weights');
+        $wx = $request->input('wx');
+        $wy = $request->input('wy');
+        $wp = $request->input('wp');
 
         $imoveis = $this->searchStaticViva($x, $y, $r)['listings'];
 
@@ -237,7 +240,14 @@ public function cmp($a, $b)
 
 		for($i = 0; $i < sizeof($imoveis); $i++)
         {
-        	$imoveis[$i]['score'] = 0;
+            if (isset($wx, $wy, $wp))
+            {
+        	    $imoveis[$i]['score'] = $wp * 1/$this->getDistance($imoveis[$i]['latitude'], $imoveis[$i]['longitude'], $wx, $wy);
+            }
+            else
+            {
+                $imoveis[$i]['score'] = 0;
+            }
         }
 
         foreach ($types as $type) {
@@ -246,7 +256,7 @@ public function cmp($a, $b)
             	$surroudings[$type] = $this->searchStaticMaps($x, $y, $r+1000, $type)['results'];
             	for($i = 0; $i < sizeof($imoveis); $i++)
         		{
-        			$imoveis[$i]['score']  += $weights[array_search($type, $types)] * 1/$this->findClosest($imoveis[$i]['latitude'], $imoveis[$i]['longitude'], $surroudings[$type]);
+                    $imoveis[$i]['score']  += $weights[array_search($type, $types)] * 1/$this->findClosest($imoveis[$i]['latitude'], $imoveis[$i]['longitude'], $surroudings[$type]);
         		}
         	}
         	else
