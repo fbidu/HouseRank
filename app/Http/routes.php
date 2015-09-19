@@ -15,11 +15,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/google/{x}/{y}/{r}', function($x, $y, $r)
-    {
-        $key = env('MAPS_KEY');
-        $client = new GuzzleHttp\Client();
-        $url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$x,$y&radius=$r&key=$key";
-        $res = $client->request('GET', $url);
-        return $res->getBody();
-});
+Route::get('/google', 'Rank@searchMaps');
+
+Route::get('/viva/{x}/{y}/{r}', 'Rank@searchViva');
