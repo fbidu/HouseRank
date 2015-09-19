@@ -262,7 +262,7 @@ public function cmp($a, $b)
                     }
                     else
                     {
-                    	$imoveis[$i]['score']  += $weights[array_search($type, $types)] * 1 / 0.000001;
+                    	$imoveis[$i]['score']  += $weights[array_search($type, $types)] * 1 / 0.001;
                     }
 
         		}
