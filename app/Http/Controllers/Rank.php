@@ -11,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 class Rank extends Controller
 {
 
-    private $types = [
+    private $GOOGLE_TYPES = [
         'accounting',
         'airport',
         'amusement_park',
@@ -187,19 +187,29 @@ class Rank extends Controller
         $y = $request->input('y');
         $r = $request->input('r');
         $types = $request->input('types');
-        $imoveis = $this->searchStaticViva($x, $y, $r)->listings;
+
+        $imoveis = $this->searchStaticViva($x, $y, $r)['listings'];
 
         foreach ($imoveis as $imovel)
         {
         }
 
         $types = explode(',', $types);
-        $sur = [];
+
+        $surroudings = [];
+
         foreach ($types as $type) {
-            $sur[$type] = $this->searchStaticMaps($x, $y, $r, $type)->results;
+        	if (in_array($type, $this->GOOGLE_TYPES))
+        	{
+            	$surroudings[$type] = $this->searchStaticMaps($x, $y, $r, $type)['results'];
+        	}
+        	else
+        	{
+        		$surroudings[$type] = [];
+        	}
         }
 
-        return $sur;
+        return $surroudings;
         
     }
     
