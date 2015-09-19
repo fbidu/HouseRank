@@ -17,4 +17,5 @@ Route::get('/', function () {
 
 Route::get('/google', 'Rank@searchMaps');
 
-Route::get('/viva/{x}/{y}/{r}', 'Rank@searchViva');
+Route::get('/viva', 'Rank@searchViva');
+
