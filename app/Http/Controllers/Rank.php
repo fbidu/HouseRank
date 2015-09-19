@@ -230,7 +230,6 @@ public function cmp($a, $b)
         $wx = $request->input('wx');
         $wy = $request->input('wy');
         $wp = $request->input('wp');
-        dd($request);
         $imoveis = $this->searchStaticViva($x, $y, $r)['listings'];
         $types = explode(',', $types);
         $weights = explode(',', $weights);
