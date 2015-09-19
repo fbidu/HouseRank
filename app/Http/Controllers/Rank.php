@@ -176,11 +176,13 @@ class Rank extends Controller
         return json_decode($res->getBody(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
     }
 
-    /**
-     * undocumented function
-     *
-     * @return void
-     */
+
+    public function findClosest()
+    {
+
+    }
+
+
     public function search(Request $request)
     {
         $x = $request->input('x');
@@ -190,24 +192,33 @@ class Rank extends Controller
 
         $imoveis = $this->searchStaticViva($x, $y, $r)['listings'];
 
-        foreach ($imoveis as $imovel)
-        {
-        }
-
         $types = explode(',', $types);
-
         $surroudings = [];
 
-        foreach ($types as $type) {
-        	if (in_array($type, $this->GOOGLE_TYPES))
+        foreach ($imoveis as $imovel)
+        {
+        	$surroudings[$imovel['propertyId']] = [];
+        	$lat = $imovel['latitude'];
+        	$lng = $imovel['longitude'];
+        	foreach ($types as $type)
         	{
-            	$surroudings[$type] = $this->searchStaticMaps($x, $y, $r, $type)['results'];
-        	}
-        	else
-        	{
-        		$surroudings[$type] = [];
+        		if (in_array($type, $this->GOOGLE_TYPES))
+        		{
+            		$surroudings[$imovel['propertyId']][$type] = $this->searchStaticMaps($lat, $lng, 200, $type)['results'];
+        		}
+        		else
+        		{
+        			$surroudings[$imovel['propertyId']][$type] = [];
+        		}
         	}
         }
+
+        
+        
+
+        
+
+
 
         return $surroudings;
         
